@@ -18,7 +18,9 @@ MATCH_SERIES = ["KXATPMATCH", "KXWTAMATCH", "KXATPCHALLENGERMATCH", "KXWTACHALLE
 SET_SERIES = ["KXATPSETWINNER", "KXWTASETWINNER", "KXATPCHALLENGERSETWINNER", "KXWTACHALLENGERSETWINNER",
               "KXITFWSETWINNER", "KXITFSETWINNER"]
 HOURS_LIVE = 8
-SLEEP = float(os.environ.get("KALSHI_SLEEP", "0.12"))
+# Only these series get minute-level price history (tour-level has set-winner markets to time set 1).
+CANDLE_SERIES = os.environ.get("CANDLE_SERIES", "KXATPMATCH,KXWTAMATCH").split(",")
+SLEEP = float(os.environ.get("KALSHI_SLEEP", "0.05"))
 MAX_MARKETS = int(os.environ.get("MAX_MARKETS", "0"))  # 0 = no cap (use a small number to smoke-test)
 OUT = os.environ.get("OUT_DIR", "data")
 
@@ -123,7 +125,7 @@ def main():
                                 m.get("open_time"), m.get("close_time"), m.get("settlement_ts"), m.get("result"),
                                 m.get("settlement_value_dollars", m.get("settlement_value", "")),
                                 m.get("volume_fp", m.get("volume", "")), m["_store"]])
-                    if kind == "match":
+                    if kind == "match" and s in CANDLE_SERIES:
                         m["_series"] = s
                         allm.append(m)
     done_path = f"{OUT}/done.txt"
